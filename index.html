@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adminline - Panel de Datos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Variables CSS para temas claro y oscuro */
+    :root {
+      --bg-body: #f0f2f5;
+      --bg-container: #ffffff;
+      --text: #1a1a1a;
+      --sidebar-bg: #ffffff;
+      --border: #dadce0;
+      --hover: #f0f2f5;
+      --accent: #1a73e8;
+      --mail-border: #f0f0f0;
+      --preview-bg: #fafafa; /* This should remain opaque */
+      --button-delete: #e74c3c;
+      --button-archive: #f39c12;
+      --overlay-bg: rgba(0, 0, 0, 0.5); /* Color de fondo para el overlay del menú móvil */
+    }
+
+    .dark-mode {
+      --bg-body: #121212;
+      --bg-container: #1e1e1e;
+      --text: #e0e0e0;
+      --sidebar-bg: #242424;
+      --border: #333;
+      --hover: #2d2d2d;
+      --accent: #4285f4;
+      --mail-border: #333;
+      --preview-bg: #2a2a2a; /* This should remain opaque */
+      --button-delete: #c0392b;
+      --button-archive: #e67e22;
+      --overlay-bg: rgba(0, 0, 0, 0.7); /* Color de fondo para el overlay del menú móvil en modo oscuro */
+    }
+
+    /* Estilos generales */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      /* Fondo de imagen para todo el body del dashboard (desktop) */
+      background-image: url('https://i.imgur.com/et4OEKL.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-color: var(--bg-body); /* Color de respaldo */
+      color: var(--text);
+      display: flex; /* Convierte el body en un contenedor flex */
+      flex-direction: column; /* Apila los elementos hijos verticalmente */
+      min-height: 100vh; /* Asegura que ocupe al menos el 100% de la altura de la ventana */
+      transition: background-color 0.3s;
+    }
+
+    /* Pantalla de login con fondo personalizado */
+    .login-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1; /* Permite que la pantalla de login ocupe la altura disponible cuando está visible */
+      width: 100%;
+      /* Fondo con la imagen proporcionada */
+      background-image: url('https://i.imgur.com/kC1Rz0W.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .login-container {
+      background: rgba(0, 0, 0, 0); /* Fondo completamente transparente */
+      padding: 40px;
+      border-radius: 12px;
+      /* Sombra azul cielo con efecto 3D para el contenedor completo */
+      box-shadow: 0 5px 25px rgba(135, 206, 235, 0.7),
+                  0 0 15px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      color: white;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .login-container h1 {
+      font-size: 26px;
+      color: white;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    /* Estilo para el logo en la pantalla de login */
+    .login-logo {
+      width: 180px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      margin: 20px auto 40px auto;
+      background-color: transparent;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: #cccccc;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #007bff;
+      border-radius: 8px;
+      font-size: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, color 0.3s;
+    }
+
+    /* Estilos para el input cuando está enfocado o tiene un valor */
+    .form-group input:focus,
+    .form-group input:not(:placeholder-shown) {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-color: #00aaff;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+
+    /* ¡IMPORTANT! Estilos para el autocompletado del navegador */
+    .form-group input:-webkit-autofill,
+    .form-group input:-webkit-autofill:hover,
+    .form-group input:-webkit-autofill:focus,
+    .form-group input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0.5) inset !important;
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+
+    .login-container button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(to right, #007bff, #00aaff);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 25px;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #0056b3;
+      box-shadow: 0 6px 15px rgba(0, 123, 255, 0.6);
+    }
+
+    .login-container button:active {
+      transform: none;
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+    }
+
+    .options-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #cccccc;
+    }
+
+    .forgot-password {
+      font-size: 14px;
+      color: #007bff;
+      text-decoration: none;
+      transition: text-decoration 0.3s;
+      margin: 0 auto;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    .success {
+      color: #27ae60;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    /* Estilos del Dashboard */
+    .dashboard {
+      display: none; /* Oculto por defecto, se muestra con login exitoso */
+      flex: 1; /* Permite que el dashboard ocupe la altura disponible cuando está visible */
+      flex-direction: column;
+      min-height: 100vh; /* Asegura que ocupe al menos el 100% de la altura de la ventana */
+      overflow: hidden;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* Usar la variable del tema directamente para el fondo del header */
+      background-color: var(--bg-container);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+
+    /* No es necesario un .dark-mode .header separado si usa var(--bg-container) directamente */
+    /* .dark-mode .header {
+      background-color: rgba(30, 30, 30, 0);
+    } */
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .header .logo-img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-left: -5px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text);
+      transition: color 0.3s;
+    }
+
+    .admin-button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s, opacity 0.3s;
+    }
+
+    .admin-button:hover {
+      background-color: #0056b3;
+      opacity: 0.9;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text);
+      cursor: pointer;
+      padding: 5px;
+      z-index: 11;
+    }
+
+    .container {
+      display: flex;
+      flex: 1; /* Ocupa el espacio restante después del header */
+      margin-top: 60px;
+      overflow: hidden;
+      transition: all 0.5s ease-in-out;
+      height: calc(100vh - 60px); /* Controla la altura del contenedor principal en desktop */
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding-top: 0;
+      position: sticky;
+      top: 60px;
+      flex: 1; /* Permite que la barra lateral ocupe la altura disponible */
+      overflow-y: auto;
+      flex-shrink: 0;
+      transition: width 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    }
+
+    .sidebar-item {
+      padding: 12px 20px;
+      font-size: 15px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background-color 0.2s, border-left 0.2s, padding-left 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background-color: var(--hover);
+    }
+
+    .sidebar-item.active {
+      background-color: var(--hover);
+      font-weight: 500;
+      border-left: 4px solid var(--accent);
+      padding-left: 16px;
+    }
+
+    .mails {
+      flex: 1; /* Toma el espacio disponible */
+      min-width: 0;
+      overflow-y: auto;
+      /* Estilos para el panel de formularios */
+      background-color: var(--bg-container); /* Usa la variable del tema */
+      background-image: none;
+      background-blend-mode: normal;
+      display: flex; /* Convierte mails en un contenedor flex para sus elementos */
+      flex-direction: column; /* Apila los elementos de correo verticalmente */
+    }
+
+    .dark-mode .mails {
+      background-color: var(--bg-container); /* Usa la variable del tema */
+    }
+
+    .mail-item {
+      display: flex;
+      width: 100%;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--mail-border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .mail-item:hover {
+      background-color: var(--hover);
+    }
+
+    .mail-item.unread {
+      font-weight: 500;
+      background-color: var(--hover);
+    }
+
+    .mail-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .mail-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mail-from {
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mail-time {
+      font-size: 13px;
+      color: #5f6368;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+
+    .dark-mode .mail-time, .dark-mode .mail-preview {
+      color: #aaa;
+    }
+
+    .mail-subject {
+      font-size: 15px;
+      margin: 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mail-preview {
+      font-size: 14px;
+      color: #5f6368;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Estilos del panel de vista previa (preview) */
+    .preview {
+      flex-basis: 0;
+      padding: 0;
+      border-left: none;
+      overflow-y: auto;
+      background-color: var(--preview-bg);
+      background-image: none;
+      background-blend-mode: normal;
+      display: flex; /* Convierte preview en un contenedor flex para su contenido */
+      flex-direction: column; /* Apila el contenido de la vista previa verticalmente */
+      transition: flex-basis 0.5s ease-in-out, padding 0.5s ease-in-out, border-left 0.5s ease-in-out;
+    }
+
+    .preview.show-content {
+      flex-basis: 350px;
+      padding: 20px;
+      border-left: 1px solid var(--border);
+      background-color: var(--preview-bg);
+    }
+
+    .preview-content {
+      display: none;
+    }
+
+    .preview-content.show {
+      display: block;
+    }
+
+    .preview-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .preview-from, .preview-date {
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #5f6368;
+    }
+
+    .dark-mode .preview-from, .dark-mode .preview-date {
+      color: #aaa;
+    }
+
+    .preview-message {
+      margin-top: 15px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .preview-image, .preview-video {
+      margin-top: 15px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .preview-video {
+      max-height: 300px;
+      object-fit: contain;
+    }
+
+    /* Estilos para la vista de formulario completo (Gmail-like) */
+    .container.show-full-preview .sidebar {
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .container.show-full-preview .mails {
+      flex: 0;
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .container.show-full-preview .preview {
+      flex-basis: 100%;
+      flex-grow: 1;
+    }
+
+    .back-button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 5px 10px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.3s;
+    }
+
+    .back-button:hover {
+      color: #0056b3;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .form-action-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.3s, opacity 0.3s;
+    }
+
+    .form-action-button.delete {
+      background-color: var(--button-delete);
+      color: white;
+    }
+
+    .form-action-button.delete:hover {
+      opacity: 0.8;
+    }
+
+    .form-action-button.archive {
+      background-color: var(--button-archive);
+      color: white;
+    }
+
+    .form-action-button.archive:hover {
+      opacity: 0.8;
+    }
+
+    /* Modal de confirmación */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--overlay-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background-color: var(--bg-container);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .modal-overlay.show .modal-content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .modal-content p {
+      font-size: 18px;
+      margin-bottom: 25px;
+      color: var(--text);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .modal-button {
+      padding: 10px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.3s, opacity 0.3s;
+    }
+
+    .modal-button.confirm-button {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .modal-button.confirm-button:hover {
+      background-color: #218838;
+    }
+
+    .modal-button.cancel-button {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .modal-button.cancel-button:hover {
+      background-color: #5a6268;
+    }
+
+    /* Admin Modal Specific Styles */
+    .admin-modal-content {
+      background-color: var(--bg-container);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      text-align: left;
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .modal-overlay.show .admin-modal-content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .admin-modal-content h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--text);
+      font-size: 22px;
+    }
+
+    .admin-modal-content .form-group {
+      margin-bottom: 15px;
+    }
+
+    .admin-modal-content label {
+      font-size: 15px;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .admin-modal-content input[type="email"],
+    .admin-modal-content input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background-color: var(--bg-body);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .admin-modal-content button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--accent);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s;
+    }
+
+    .admin-modal-content button:hover {
+      background-color: #0056b3;
+    }
+
+    .admin-modal-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 25px 0;
+    }
+
+    .admin-modal-message {
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .admin-modal-message.error {
+      color: var(--button-delete);
+    }
+
+    .admin-modal-message.success {
+      color: #27ae60;
+    }
+
+
+    /* Media Queries para Responsividad */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 200px;
+      }
+      .preview.show-content {
+        flex-basis: 300px;
+      }
+      .container.show-full-preview .sidebar {
+        width: 0;
+      }
+      .container.show-full-preview .mails {
+        width: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        /* Fondo del body en móvil, ahora respeta el tema */
+        background-image: none; /* Elimina la imagen de fondo */
+        background-color: var(--bg-body); /* Usa la variable del tema */
+        height: 100vh; /* Asegura que el body ocupe el 100% de la altura de la ventana */
+        min-height: initial; /* Reinicia min-height para que 100vh sea el principal */
+        display: flex;
+        flex-direction: column;
+      }
+
+      .login-screen, .dashboard {
+        flex: 1; /* Estos deben ocupar la altura completa del body */
+        height: 100vh; /* Establece explícitamente la altura a 100vh para estas pantallas principales */
+        min-height: initial;
+      }
+
+      .header {
+        justify-content: space-between;
+        padding: 10px 15px;
+        /* Fondo del header en móvil, ahora respeta el tema */
+        background-color: var(--bg-container); /* Usa la variable del tema */
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1); /* Mantener la sombra */
+      }
+      .dark-mode .header {
+        background-color: var(--bg-container); /* Asegura que en modo oscuro también use la variable del tema */
+      }
+
+      .menu-toggle {
+        display: block;
+        order: -1;
+      }
+
+      .logo-container {
+        flex-grow: 1;
+        justify-content: center;
+      }
+
+      .header .logo-img {
+        height: 35px;
+      }
+
+      .container {
+        flex-direction: column;
+        flex: 1; /* Asegura que el contenedor ocupe el espacio restante en el dashboard */
+        overflow-y: auto; /* Permite que el contenedor se desplace si el contenido se desborda */
+        height: auto; /* Reinicia la altura para que flex la maneje en columna */
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 60px;
+        left: -250px;
+        height: calc(100vh - 60px); /* Mantiene la altura explícita para la barra lateral fija */
+        width: 250px;
+        z-index: 999;
+        border-right: none;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        transition: left 0.3s ease-in-out;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--overlay-bg);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .overlay.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+
+      .mails {
+        width: 100%;
+        flex: 1; /* Hace que mails ocupe el espacio vertical en el diseño de columna */
+        height: auto; /* Permite que flex controle la altura */
+        margin-left: 0;
+        padding-top: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-container); /* Usa la variable del tema */
+        background-image: none;
+        background-blend-mode: normal;
+      }
+      /* Asegura que el modo oscuro no sobrescriba el fondo blanco en móvil para .mails */
+      .dark-mode .mails {
+        background-color: var(--bg-container);
+      }
+
+      .mail-preview {
+        max-width: 100%;
+      }
+      .preview {
+        width: 100%;
+        flex: 1; /* Hace que preview ocupe el espacio vertical en el diseño de columna */
+        height: auto; /* Permite que flex controle la altura */
+        border-left: none;
+        border-top: 1px solid var(--border);
+        flex-grow: 1;
+        flex-basis: auto;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--preview-bg); /* Usa la variable del tema */
+      }
+      /* Asegura que el modo oscuro no sobrescriba el fondo blanco en móvil para .preview */
+      .dark-mode .preview {
+        background-color: var(--preview-bg);
+      }
+
+      .container.show-full-preview .sidebar {
+        display: none;
+      }
+      .container.show-full-preview .mails {
+        display: none;
+      }
+      .container.show-full-preview .preview {
+        display: flex; /* Cambiado a flex para que su contenido se apile correctamente */
+        flex: 1;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 20px;
+        margin: 0 15px;
+      }
+      .login-container h1 {
+        font-size: 22px;
+      }
+      .header {
+        padding: 10px 15px;
+      }
+      .logo {
+        font-size: 18px;
+      }
+      .mail-item {
+        padding: 10px 15px;
+      }
+      .mail-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+      }
+      .mail-from, .mail-subject {
+        font-size: 14px;
+      }
+      .mail-time, .mail-preview {
+        font-size: 12px;
+      }
+      .preview-title {
+        font-size: 16px;
+      }
+      .preview-from, .preview-date, .preview-message {
+        font-size: 13px;
+      }
+      .welcome-message-text {
+        font-size: 2em;
+      }
+      .modal-content {
+        padding: 20px;
+      }
+      .modal-content p {
+        font-size: 16px;
+      }
+      .modal-button {
+        padding: 8px 15px;
+        font-size: 14px;
+      }
+      .admin-modal-content {
+        padding: 20px;
+      }
+      .admin-modal-content h2 {
+        font-size: 20px;
+      }
+    }
+
+    /* Estilos para la nueva pantalla de bienvenida y carga */
+    .welcome-loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      background-image: url('https://i.imgur.com/kC1Rz0W.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      color: white;
+    }
+
+    .welcome-loading-screen.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .loading-screen-logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100px;
+      height: auto;
+      object-fit: contain;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .welcome-loading-screen.show .loading-screen-logo {
+      opacity: 1;
+    }
+
+    .welcome-message-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      width: 100%;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .welcome-message-text {
+      font-size: 3em;
+      font-weight: 500;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: .15em solid orange;
+      animation: typing 2s steps(20, end) forwards, blink-caret .75s step-end infinite;
+      width: 0;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: orange; }
+    }
+
+    .reading-icon {
+      font-size: 0.8em;
+      margin-left: 15px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .sphere-spinner-container {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .sphere-spinner-container.show {
+      opacity: 1;
+    }
+
+    .sphere {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #007bff;
+      animation: bounce 1s infinite ease-in-out;
+    }
+
+    .sphere:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .sphere:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .dashboard.fade-in {
+      animation: fadeIn 1s forwards ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Estilos para el modal de imagen expandida */
+    .image-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro semitransparente */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10001; /* Mayor que otros modales */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .image-modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .image-modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .image-modal-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .image-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+      z-index: 10002;
+      background: none;
+      border: none;
+      padding: 5px;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .image-modal-close:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+  </style>
+</head>
+<body class="light-mode">
+
+  <!-- Pantalla de Login -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-container">
+      <img src="https://i.imgur.com/TiAds45.png" alt="Logo de Adminline" class="login-logo">
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Username</label>
+          <input type="email" id="email" placeholder="" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="" required />
+        </div>
+        <div class="options-group">
+          <a href="#" id="resetPassword" class="forgot-password">Forgot Password?</a>
+        </div>
+        <button type="submit">LOGIN</button>
+        <p class="error" id="errorMessage" style="display: none;"></p>
+        <p class="success" id="successMessage" style="display: none;"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Nueva Pantalla de Bienvenida y Carga (oculta por defecto) -->
+  <div id="welcomeLoadingScreen" class="welcome-loading-screen">
+    <img id="loadingScreenLogo" src="https://i.imgur.com/TiAds45.png" alt="Adminline Logo" class="loading-screen-logo">
+    <div id="welcomeMessageContainer" class="welcome-message-container">
+      <span id="welcomeMessageText" class="welcome-message-text"></span>
+      <i id="readingIcon" class="fas fa-book-reader reading-icon"></i>
+    </div>
+    <div id="sphereSpinnerContainer" class="sphere-spinner-container">
+      <div class="sphere sphere-1"></div>
+      <div class="sphere sphere-2"></div>
+      <div class="sphere sphere-3"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard (oculto hasta login) -->
+  <div id="dashboard" class="dashboard">
+
+    <!-- Barra superior -->
+    <div class="header">
+      <button id="menuToggle" class="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo-container">
+        <img src="https://i.imgur.com/TiAds45.png" alt="Adminline Logo" class="logo-img">
+        <!-- El texto 'Adminline' se ha eliminado de aquí -->
+      </div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button id="adminActionsBtn" class="admin-button" style="display: none;">
+          <i class="fas fa-users-cog"></i> Administrar Usuarios
+        </button>
+        <button id="themeToggle" class="theme-toggle">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Overlay para el menú móvil -->
+    <div id="mobileMenuOverlay" class="overlay"></div>
+
+    <div class="container">
+      <!-- Barra lateral -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-item active" data-filter="inbox" id="inboxFilter">
+          <i class="fas fa-inbox"></i> Entrada
+        </div>
+        <div class="sidebar-item" data-filter="archived" id="archivedFilter">
+          <i class="fas fa-archive"></i> Archivados
+        </div>
+        <div class="sidebar-item" data-filter="trash" id="trashFilter">
+          <i class="fas fa-trash"></i> Eliminados
+        </div>
+        <!-- Aquí puedes añadir más ítems a la barra lateral -->
+      </div>
+
+      <!-- Lista de formularios -->
+      <div class="mails" id="listaMensajes">
+        <!-- Los formularios (incluidos los de prueba) se cargarán aquí dinámicamente -->
+      </div>
+
+      <!-- Panel de vista previa del formulario -->
+      <div class="preview" id="panelVista">
+        <div class="preview-content" id="vistaContenido">
+          <button id="backToFormsBtn" class="back-button"><i class="fas fa-arrow-left"></i> Volver a Formularios</button>
+          <h3 class="preview-title" id="vistaTitulo"></h3>
+          <p class="preview-from"><strong>De:</strong> <span id="vistaDe"></span></p>
+          <p class="preview-date"><strong>Fecha:</strong> <span id="vistaFecha"></span></p>
+          <hr>
+          <div class="preview-message" id="vistaMensaje"></div>
+          <div id="vistaMedia"></div>
+          <div class="form-actions">
+            <button id="archiveFormBtn" class="form-action-button archive"><i class="fas fa-archive"></i> Archivar</button>
+            <button id="deleteFormBtn" class="form-action-button delete"><i class="fas fa-trash"></i> Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmationModal" class="modal-overlay">
+    <div class="modal-content">
+      <p id="modalMessage"></p>
+      <div class="modal-buttons">
+        <button id="confirmYes" class="modal-button confirm-button">Sí</button>
+        <button id="confirmNo" class="modal-button cancel-button">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Actions Modal -->
+  <div id="adminModal" class="modal-overlay">
+    <div class="admin-modal-content">
+      <h2>Administrar Usuarios</h2>
+
+      <div class="admin-section">
+        <h3>Registrar Nuevo Usuario</h3>
+        <form id="registerUserForm">
+          <div class="form-group">
+            <label for="regEmail">Correo electrónico:</label>
+            <input type="email" id="regEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Contraseña:</label>
+            <input type="password" id="regPassword" required>
+          </div>
+          <button type="submit">Registrar Usuario</button>
+          <p class="admin-modal-message success" id="regSuccess" style="display: none;"></p>
+          <p class="admin-modal-message error" id="regError" style="display: none;"></p>
+        </form>
+      </div>
+
+      <hr>
+
+      <div class="admin-section">
+        <h3>Promover a Administrador</h3>
+        <form id="promoteAdminForm">
+          <div class="form-group">
+            <label for="promoteEmail">Correo electrónico del usuario:</label>
+            <input type="email" id="promoteEmail" required>
+          </div>
+          <button type="submit">Promover</button>
+          <p class="admin-modal-message success" id="promoteSuccess" style="display: none;"></p>
+          <p class="admin-modal-message error" id="promoteError" style="display: none;"></p>
+        </form>
+      </div>
+
+      <button id="closeAdminModal" style="margin-top: 20px; background-color: #6c757d;">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Modal para expandir imagen -->
+  <div id="imageModal" class="image-modal-overlay">
+    <button id="closeImageModal" class="image-modal-close"><i class="fas fa-times-circle"></i></button>
+    <div class="image-modal-content">
+      <img id="expandedImage" src="" alt="Imagen Expandida">
+    </div>
+  </div>
+
+  <!-- Firebase SDK y Lógica JavaScript -->
+  <script type="module">
+    // Importar módulos de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      sendPasswordResetEmail,
+      signOut,
+      createUserWithEmailAndPassword, // Importar para registrar nuevos usuarios
+      sendEmailVerification, // Importar para enviar verificación de correo
+      setPersistence, // Importar setPersistence
+      inMemoryPersistence // Importar inMemoryPersistence para persistencia de sesión
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      onSnapshot,
+      doc,
+      deleteDoc,
+      updateDoc,
+      setDoc,
+      getDoc,
+      query,
+      where,
+      addDoc // Importar addDoc para añadir nuevos documentos sin ID específico
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔥 Tu configuración de Firebase (NO EDITAR, es la que proporcionaste)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsdMC3fs95niu3BSaQmYuQij6bQFevXoQ",
+      authDomain: "adminline-4e555.firebaseapp.com",
+      projectId: "adminline-4e555",
+      storageBucket: "adminline-4e555.firebasestorage.app",
+      messagingSenderId: "759878852701",
+      appId: "1:759878852701:web:a3ec4c6432162ad2846db4",
+      measurementId: "G-G2KJ364RWW"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ** Importante: Forzar cierre de sesión al cargar la página **
+    // Esto asegura que la sesión se cierre con cada recarga (F5),
+    // cumpliendo tu requisito de que la sesión no persista.
+    signOut(auth).catch(error => console.error("Error al cerrar sesión al inicio:", error));
+
+    // Obtener referencias a elementos del DOM
+    const loginScreen = document.getElementById("loginScreen");
+    const loginContainer = document.querySelector(".login-container");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("errorMessage");
+    const successMessage = document.getElementById("successMessage");
+    const resetPassword = document.getElementById("resetPassword");
+    const themeToggle = document.getElementById("themeToggle");
+    const icon = themeToggle.querySelector("i");
+    const listaMensajes = document.getElementById("listaMensajes");
+    const panelVista = document.getElementById("panelVista");
+    const vistaContenido = document.getElementById("vistaContenido");
+    const vistaTitulo = document.getElementById("vistaTitulo");
+    const vistaDe = document.getElementById("vistaDe");
+    const vistaFecha = document.getElementById("vistaFecha");
+    const vistaMensaje = document.getElementById("vistaMensaje");
+    const vistaMedia = document.getElementById("vistaMedia");
+    const welcomeLoadingScreen = document.getElementById("welcomeLoadingScreen");
+    const loadingScreenLogo = document.getElementById("loadingScreenLogo");
+    const welcomeMessageContainer = document.getElementById("welcomeMessageContainer");
+    const welcomeMessageText = document.getElementById("welcomeMessageText");
+    const readingIcon = document.getElementById("readingIcon");
+    const sphereSpinnerContainer = document.getElementById("sphereSpinnerContainer");
+
+    const mainContainer = document.querySelector(".container");
+    const backToFormsBtn = document.getElementById("backToFormsBtn");
+    const archiveFormBtn = document.getElementById("archiveFormBtn");
+    const deleteFormBtn = document.getElementById("deleteFormBtn");
+
+    const confirmationModal = document.getElementById("confirmationModal");
+    const modalMessage = document.getElementById("modalMessage");
+    const confirmYesBtn = document.getElementById("confirmYes"); // CORRECCIÓN: Eliminado 'document ='
+    const confirmNoBtn = document.getElementById("confirmNo");
+
+    const inboxFilter = document.getElementById("inboxFilter");
+    const archivedFilter = document.getElementById("archivedFilter");
+    const trashFilter = document.getElementById("trashFilter");
+
+    // Nuevas referencias para la funcionalidad de administrador
+    const adminActionsBtn = document.getElementById("adminActionsBtn");
+    const adminModal = document.getElementById("adminModal");
+    const closeAdminModal = document.getElementById("closeAdminModal");
+    const registerUserForm = document.getElementById("registerUserForm");
+    const regEmailInput = document.getElementById("regEmail");
+    const regPasswordInput = document.getElementById("regPassword");
+    const regSuccessMessage = document.getElementById("regSuccess");
+    const regErrorMessage = document.getElementById("regError");
+    const promoteAdminForm = document.getElementById("promoteAdminForm");
+    const promoteEmailInput = document.getElementById("promoteEmail");
+    const promoteSuccessMessage = document.getElementById("promoteSuccess");
+    const promoteErrorMessage = document.getElementById("promoteError");
+
+    // Referencias para el menú de hamburguesa
+    const menuToggle = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+    const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+
+    // Referencias para el modal de imagen expandida
+    const imageModal = document.getElementById('imageModal');
+    const expandedImage = document.getElementById('expandedImage');
+    const closeImageModal = document.getElementById('closeImageModal');
+
+
+    let currentFormId = null;
+    let currentFilter = 'inbox';
+    let currentUserRole = 'user'; // Rol por defecto, se actualizará al iniciar sesión
+
+    // Ocultar el contenido de la vista previa al inicio
+    vistaContenido.style.display = 'none';
+    // Colapsar el panel de vista previa al inicio
+    panelVista.classList.remove('show-content');
+
+
+    /**
+     * Muestra un mensaje de error o éxito en la interfaz.
+     * @param {HTMLElement} element - El elemento DOM donde se mostrará el mensaje (errorMessage o successMessage).
+     * @param {string} text - El texto del mensaje a mostrar.
+     * @param {boolean} [isError=true] - Si es true, el mensaje es un error; de lo contrario, es un éxito.
+     */
+    function showMessage(element, text, isError = true) {
+      element.textContent = text;
+      element.style.display = "block";
+      // Asegura que solo se muestre un tipo de mensaje a la vez
+      if (isError) {
+        successMessage.style.display = "none";
+      } else {
+        errorMessage.style.display = "none";
+      }
+    }
+
+    /**
+     * Muestra un mensaje específico dentro del modal de administración.
+     * @param {HTMLElement} element - El elemento DOM donde se mostrará el mensaje (regSuccessMessage, regErrorMessage, etc.).
+     * @param {string} text - El texto del mensaje a mostrar.
+     * @param {boolean} [isError=true] - Si es true, el mensaje es un error; de lo contrario, es un éxito.
+     */
+    function showAdminModalMessage(element, text, isError = true) {
+      regSuccessMessage.style.display = 'none';
+      regErrorMessage.style.display = 'none';
+      promoteSuccessMessage.style.display = 'none';
+      promoteErrorMessage.style.display = 'none';
+
+      element.textContent = text;
+      element.style.display = "block";
+      element.classList.toggle('error', isError);
+      element.classList.toggle('success', !isError);
+    }
+
+    // Función para simular el efecto de escritura
+    async function typeWriter(element, text, delay = 100) {
+      element.textContent = ''; // Limpiar el contenido inicial
+      element.style.width = '0'; // Resetear ancho para la animación
+      element.offsetHeight; // Truco para forzar reflow y aplicar el reset
+      element.style.animation = `typing ${text.length * delay / 1000}s steps(${text.length}, end) forwards, blink-caret .75s step-end infinite`;
+
+      for (let i = 0; i < text.length; i++) {
+        element.textContent += text.charAt(i);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      element.style.borderRight = 'none'; // Quitar el cursor al finalizar
+      await new Promise(resolve => setTimeout(resolve, 500)); // Pequeña pausa después de escribir
+    }
+
+    /**
+     * Muestra el modal de confirmación.
+     * @param {string} message - El mensaje a mostrar en el modal.
+     * @returns {Promise<boolean>} - Resuelve a true si el usuario confirma, false si cancela.
+     */
+    function showConfirmationModal(message) {
+      return new Promise(resolve => {
+        modalMessage.textContent = message;
+        confirmationModal.classList.add('show');
+
+        const handleConfirm = () => {
+          confirmationModal.classList.remove('show');
+          confirmYesBtn.removeEventListener('click', handleConfirm);
+          confirmNoBtn.removeEventListener('click', handleCancel);
+          resolve(true);
+        };
+
+        const handleCancel = () => {
+          confirmationModal.classList.remove('show');
+          confirmYesBtn.removeEventListener('click', handleConfirm);
+          confirmNoBtn.removeEventListener('click', handleCancel);
+          resolve(false);
+        };
+
+        confirmYesBtn.addEventListener('click', handleConfirm);
+        confirmNoBtn.addEventListener('click', handleCancel);
+      });
+    }
+
+    // Función para renderizar los formularios en la lista
+    function renderForms(formsData) {
+      listaMensajes.innerHTML = ""; // Limpia la lista actual de mensajes
+
+      if (formsData.length === 0) {
+        listaMensajes.innerHTML = `<div class="mail-item"><p>No hay formularios en esta categoría.</p></div>`;
+        return;
+      }
+
+      formsData.forEach((formData) => {
+        const id = formData.id;
+        const nombre = formData.nombre || 'Anónimo';
+        const email = formData.email || 'sin email';
+        const mensaje = formData.mensaje || '';
+        const fecha = formData.fecha?.toDate ? formData.fecha.toDate().toLocaleString() : new Date(formData.fecha).toLocaleString() || 'Fecha desconocida'; // Manejar objetos Date y Timestamps
+        const mediaUrl = formData.mediaUrl || null;
+        const status = formData.status || 'inbox'; // Asegurar que tenga un status
+
+        const iniciales = nombre
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+          .substring(0, 2);
+
+        const mailItem = document.createElement("div");
+        mailItem.className = "mail-item unread"; // Marca como no leído por defecto
+        mailItem.dataset.id = id; // Guarda el ID del documento en el dataset
+        mailItem.dataset.status = status; // Guarda el status en el dataset
+        mailItem.innerHTML = `
+          <div class="mail-avatar">${iniciales}</div>
+          <div class="mail-content">
+            <div class="mail-header">
+              <span class="mail-from">${nombre}</span>
+              <span class="mail-time">${fecha.split(',')[1] || fecha}</span>
+            </div>
+            <div class="mail-subject">Nuevo formulario</div>
+            <div class="mail-preview">${mensaje.substring(0, 100)}${mensaje.length > 100 ? '...' : ''}</div>
+          </div>
+        `;
+
+        mailItem.addEventListener("click", () => {
+          // Populate preview with form data
+          currentFormId = id; // Almacenar el ID del formulario actual
+          vistaTitulo.textContent = "Formulario de contacto";
+          vistaDe.textContent = `De: ${nombre} (${email})`;
+          vistaFecha.textContent = `Fecha: ${fecha}`;
+          vistaMensaje.textContent = mensaje;
+          vistaMedia.innerHTML = "";
+
+          if (mediaUrl) {
+            if (mediaUrl.match(/\.(jpeg|jpg|png|gif)$/i)) {
+              const imgElement = document.createElement('img');
+              imgElement.src = mediaUrl;
+              imgElement.className = 'preview-image';
+              imgElement.alt = 'Imagen adjunta';
+              imgElement.style.cursor = 'pointer'; // Indicar que es clickeable
+              imgElement.onclick = () => { // Añadir evento para expandir imagen
+                expandedImage.src = mediaUrl;
+                imageModal.classList.add('show');
+              };
+              vistaMedia.appendChild(imgElement);
+            } else if (mediaUrl.match(/\.(mp4|webm|ogg)$/i)) {
+              vistaMedia.innerHTML = `<video controls class="preview-video"><source src="${mediaUrl}" type="video/mp4">Tu navegador no soporta el video.</video>`;
+            }
+          }
+
+          mailItem.classList.remove("unread");
+          mainContainer.classList.add('show-full-preview'); // Activa la vista completa (colapsa sidebar y mails)
+          panelVista.classList.add('show-content'); // Muestra el panel de vista previa
+          vistaContenido.style.display = 'block'; // Muestra el contenido dentro del panel de vista previa
+        });
+
+        listaMensajes.appendChild(mailItem); // Añade el mensaje a la lista
+      });
+    }
+
+    // Función para añadir formularios de prueba a Firestore si no existen
+    async function seedStaticForms() {
+      const staticFormItems = [
+        {
+          id: "form-prueba-1",
+          nombre: "Juan Pérez",
+          email: "juan.perez@example.com",
+          mensaje: "Estimados, me gustaría obtener más detalles sobre sus servicios...",
+          fecha: new Date(2025, 6, 30, 10, 30), // 30 de julio de 2025, 10:30 AM
+          mediaUrl: null,
+          status: "inbox"
+        },
+        {
+          id: "form-prueba-2",
+          nombre: "María Antonieta",
+          email: "maria.antonieta@example.com",
+          mensaje: "Tengo un problema con la configuración de mi cuenta, ¿podrían ayudarme?",
+          fecha: new Date(2025, 6, 29, 15, 0), // 29 de julio de 2025, 3:00 PM
+          mediaUrl: 'https://res.cloudinary.com/dae8gaaek/image/upload/v1700000000/sample.jpg', // Ejemplo de imagen
+          status: "inbox"
+        },
+        {
+          id: "form-prueba-3",
+          nombre: "Pedro Gómez",
+          email: "pedro.gomez@example.com",
+          mensaje: "Consulta sobre el estado de mi pedido.",
+          fecha: new Date(2025, 6, 28, 11, 0),
+          mediaUrl: 'https://res.cloudinary.com/dae8gaaek/video/upload/v1700000000/dog.mp4', // Ejemplo de video
+          status: "inbox"
+        }
+      ];
+
+      for (const staticForm of staticFormItems) {
+        const docRef = doc(db, 'mensajes', staticForm.id);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          // Si el documento no existe en Firestore, lo creamos
+          await setDoc(docRef, staticForm);
+          console.log(`Formulario de prueba ${staticForm.id} añadido a Firestore.`);
+        }
+      }
+
+      // Asegurar que el usuario admin de prueba exista en la colección 'users'
+      // IMPORTANTE: El UID 'admin_test_user_id' es solo un placeholder.
+      // En una aplicación real, el UID se obtiene de Firebase Auth.
+      // Para un admin de prueba, puedes crear la cuenta en Firebase Auth manualmente
+      // y luego añadir su UID real aquí. O, si es la primera vez que se ejecuta,
+      // el código en onAuthStateChanged creará el documento 'users' para el admin.
+      const adminUserEmail = "admin@example.com"; // Correo del admin de prueba
+      // No necesitamos el UID aquí directamente para seedStaticForms, ya que onAuthStateChanged lo manejará.
+      // Solo aseguramos que los formularios de prueba existan.
+    }
+
+
+    // Función para cargar y filtrar formularios de Firestore
+    let unsubscribeForms = null; // Para almacenar la función de desuscripción de onSnapshot
+
+    function loadForms(filterStatus) {
+      if (unsubscribeForms) {
+        unsubscribeForms(); // Desuscribirse del listener anterior si existe
+      }
+
+      let formsQuery = collection(db, "mensajes");
+
+      if (filterStatus === 'inbox') {
+        formsQuery = query(formsQuery, where('status', '==', 'inbox'));
+      } else if (filterStatus === 'archived') {
+        formsQuery = query(formsQuery, where('status', '==', 'archived'));
+      } else if (filterStatus === 'trash') {
+        formsQuery = query(formsQuery, where('status', '==', 'deleted')); // Asumiendo un status 'deleted' para la papelera
+      }
+      // Si el filtro no es 'inbox', 'archived' o 'deleted', se mostrarán todos los documentos sin filtro de status.
+
+      unsubscribeForms = onSnapshot(formsQuery, (snapshot) => {
+        const formsData = [];
+        snapshot.docs.forEach((doc) => {
+          formsData.push({ id: doc.id, ...doc.data() });
+        });
+        renderForms(formsData);
+      }, (error) => {
+        console.error("Error al obtener formularios: ", error);
+        listaMensajes.innerHTML = `<div class="mail-item"><p>Error al cargar formularios.</p></div>`;
+      });
+    }
+
+
+    // Manejar el envío del formulario de login
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault(); // Previene el comportamiento por defecto del formulario
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        // Establecer la persistencia de la sesión a 'inMemoryPersistence'
+        // Esto significa que la sesión NO se mantendrá si la página se recarga o la pestaña se cierra.
+        await setPersistence(auth, inMemoryPersistence);
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Verificar si el correo electrónico del usuario está verificado
+        // Esta verificación se moverá principalmente a onAuthStateChanged para una lógica centralizada
+        // Pero se mantiene aquí para una retroalimentación inmediata si el login falla por no verificado.
+        if (!user.emailVerified) {
+          await signOut(auth); // Si no está verificado, cierra la sesión
+          showMessage(errorMessage, "Por favor, verifica tu correo electrónico antes de continuar.", true);
+          return; // Detiene la ejecución si el correo no está verificado
+        }
+
+        // --- Secuencia de Animación de Login REVISADA Y AJUSTADA ---
+
+        // 1. Iniciar el deslizamiento del contenedor de login
+        loginContainer.classList.add('slide-out');
+
+        // 2. Mostrar la pantalla de bienvenida/carga *inmediatamente* para que cubra la transición
+        welcomeLoadingScreen.style.display = "flex"; // Asegura que sea display: flex antes de la transición
+        // Pequeña pausa para asegurar que el navegador aplique display:flex antes de la transición de opacidad
+        await new Promise(resolve => setTimeout(resolve, 50));
+        welcomeLoadingScreen.classList.add('show'); // Activar su fade-in (0.5s)
+
+        // Esperar a que la animación de slide-out del loginContainer termine (0.8s)
+        // Y a que la pantalla de carga esté completamente opaca (0.5s)
+        // Tomamos el mayor de los tiempos para asegurar que todo se vea bien.
+        await new Promise(resolve => setTimeout(resolve, 800)); // Esperar a que el slide-out termine
+
+        // 3. Ocultar la pantalla de login completamente
+        loginScreen.style.display = "none";
+
+        // 4. Iniciar el efecto de escritura del mensaje de bienvenida
+        await typeWriter(welcomeMessageText, "¡Bienvenido!");
+        readingIcon.style.opacity = 1; // Hacer el icono visible después de escribir
+        await new Promise(resolve => setTimeout(resolve, 500)); // Pausa después del mensaje y aparición del icono
+
+        // 5. Mostrar los spinners (esferas)
+        sphereSpinnerContainer.classList.add('show'); // Activar la visibilidad de las esferas
+        await new Promise(resolve => setTimeout(resolve, 8000)); // Dejar la pantalla de carga visible por 8 segundos
+
+        // 6. Ocultar la pantalla de bienvenida/carga
+        welcomeLoadingScreen.classList.remove('show'); // Esto activará la transición de fade-out (0.5s)
+        // Esperar a que la pantalla de carga se desvanezca
+        await new Promise(resolve => setTimeout(resolve, 500));
+        welcomeLoadingScreen.style.display = "none"; // Ocultar completamente después del fade-out
+
+        // 7. Preparar el dashboard para la animación de entrada
+        dashboard.style.opacity = 0; // Establecer opacidad inicial a 0
+        dashboard.style.display = "flex"; // Hacerlo visible en el flujo, pero transparente
+
+        // 8. Aplicar la animación de entrada al dashboard
+        dashboard.classList.add('fade-in');
+
+        // Restaurar el contenido original del login-container (útil si el usuario cierra sesión más tarde)
+        // Se asume que originalLoginContent está definido en algún lugar o se puede obtener del DOM.
+        // Por ahora, lo dejaré comentado si no es una variable global.
+        // loginContainer.innerHTML = originalLoginContent;
+        loginContainer.classList.remove('slide-out');
+        loginContainer.style.transform = 'translateY(0)'; // Reset transform to ensure it's in original position if shown again
+        loginContainer.style.opacity = 1; // Reset opacity
+
+      } catch (error) {
+        // Manejo de errores específicos de Firebase Auth
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          showMessage(errorMessage, "Correo o contraseña incorrectos.");
+        } else if (error.code === 'auth/user-disabled') {
+          showMessage(errorMessage, "Esta cuenta ha sido desactivada.");
+        } else {
+          showMessage(errorMessage, "Error: " + error.message);
+        }
+      }
+    });
+
+    // Manejar el clic en "Olvidaste tu contraseña?"
+    resetPassword.addEventListener("click", async (e) => {
+      e.preventDefault(); // Previene el comportamiento por defecto del enlace
+      const email = document.getElementById("email").value;
+
+      if (!email) {
+        showMessage(errorMessage, "Ingresa tu correo para restablecer la contraseña.");
+        return; // Detiene la ejecución si no se ingresó un correo
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage(successMessage, `Se envió un enlace de recuperación a ${email}`, false);
+      } catch (error) {
+        showMessage(errorMessage, "Error al enviar el correo de recuperación: " + error.message);
+      }
+    });
+
+    // Cambiar entre tema claro y oscuro
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode"); // Alterna la clase 'dark-mode'
+      // Cambia el icono de luna a sol y viceversa
+      if (document.body.classList.contains("dark-mode")) {
+        icon.className = "fas fa-sun";
+      } else {
+        icon.className = "fas fa-moon";
+      }
+    });
+
+    // Observador del estado de autenticación de Firebase
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Obtener el rol del usuario
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          currentUserRole = userDocSnap.data().role || 'user';
+        } else {
+          // Si el documento de usuario no existe, crearlo con rol 'user'
+          // Esto es importante para que todos los usuarios tengan un rol definido en Firestore
+          await setDoc(userDocRef, { email: user.email, role: 'user', uid: user.uid });
+          currentUserRole = 'user';
+        }
+        // --- DEBUGGING: Log current user role ---
+        console.log("Current user role detected:", currentUserRole);
+        // --- END DEBUGGING ---
+
+        if (user.emailVerified) {
+          loginScreen.style.display = "none";
+          welcomeLoadingScreen.style.display = "none";
+          dashboard.style.display = "flex";
+          dashboard.classList.remove('fade-in');
+          dashboard.style.opacity = 1;
+
+          panelVista.classList.remove('show-content');
+          vistaContenido.style.display = 'none';
+
+          // Mostrar/ocultar botón de administración
+          if (currentUserRole === 'admin') {
+            adminActionsBtn.style.display = 'flex';
+            // Solo ejecutar seedStaticForms si el usuario es admin
+            await seedStaticForms();
+          } else {
+            adminActionsBtn.style.display = 'none';
+          }
+
+          loadForms(currentFilter); // Cargar los formularios iniciales
+        } else {
+          // Si el correo no está verificado, cerrar sesión y mostrar mensaje
+          await signOut(auth);
+          loginScreen.style.display = "flex";
+          welcomeLoadingScreen.style.display = "none";
+          dashboard.style.display = "none";
+          showMessage(errorMessage, "Por favor, verifica tu correo electrónico antes de continuar.", true);
+        }
+      } else {
+        // Si no hay usuario autenticado, mostrar la pantalla de login.
+        // El signOut() explícito al inicio del script ya maneja el cierre de sesión en recargas.
+        loginScreen.style.display = "flex";
+        welcomeLoadingScreen.style.display = "none";
+        dashboard.style.display = "none";
+        adminActionsBtn.style.display = 'none'; // Asegurarse de que el botón admin esté oculto si no hay usuario
+        currentUserRole = 'user'; // Resetear rol
+      }
+    });
+
+    // Manejar el clic del botón "Volver a Formularios"
+    backToFormsBtn.addEventListener("click", () => {
+      mainContainer.classList.remove('show-full-preview');
+      panelVista.classList.remove('show-content');
+      vistaContenido.style.display = 'none';
+      currentFormId = null;
+      // Cerrar el menú de hamburguesa si está abierto al volver a la lista
+      sidebar.classList.remove('open');
+      mobileMenuOverlay.classList.remove('show');
+    });
+
+    // Manejar el clic del botón "Archivar"
+    archiveFormBtn.addEventListener("click", async () => {
+      if (currentUserRole !== 'admin') {
+        showMessage(errorMessage, "Acceso denegado. Solo los administradores pueden archivar formularios.", true);
+        return;
+      }
+      if (currentFormId) {
+        try {
+          const formDocRef = doc(db, 'mensajes', currentFormId);
+          await updateDoc(formDocRef, { status: 'archived' });
+          showMessage(successMessage, "Formulario archivado correctamente.", false);
+          backToFormsBtn.click();
+        } catch (error) {
+          showMessage(errorMessage, "Error al archivar formulario: " + error.message);
+        }
+      }
+    });
+
+    // Manejar el clic del botón "Eliminar"
+    deleteFormBtn.addEventListener("click", async () => {
+      if (currentUserRole !== 'admin') {
+        showMessage(errorMessage, "Acceso denegado. Solo los administradores pueden eliminar formularios.", true);
+        return;
+      }
+      if (currentFormId) {
+        const confirmed = await showConfirmationModal("¿Estás seguro de que quieres eliminar este formulario permanentemente?");
+        if (confirmed) {
+          try {
+            const docRef = doc(db, 'mensajes', currentFormId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              await deleteDoc(docRef);
+              showMessage(successMessage, "Formulario eliminado permanentemente.", false);
+            } else {
+              showMessage(errorMessage, "El formulario no existe en la base de datos para eliminar.", true);
+            }
+            backToFormsBtn.click();
+          } catch (error) {
+            showMessage(errorMessage, "Error al eliminar formulario: " + error.message);
+          }
+        }
+      }
+    });
+
+    // Manejar los clics en los filtros de la barra lateral
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        this.classList.add('active');
+
+        currentFilter = this.dataset.filter;
+        loadForms(currentFilter);
+
+        backToFormsBtn.click(); // Cierra el menú de hamburguesa y la vista de detalle
+      });
+    });
+
+    // --- Lógica del Modal de Administración ---
+
+    adminActionsBtn.addEventListener('click', () => {
+      adminModal.classList.add('show');
+      // Limpiar mensajes y campos al abrir el modal
+      regEmailInput.value = '';
+      regPasswordInput.value = '';
+      promoteEmailInput.value = '';
+      regSuccessMessage.style.display = 'none';
+      regErrorMessage.style.display = 'none';
+    });
+
+    closeAdminModal.addEventListener('click', () => {
+      adminModal.classList.remove('show');
+    });
+
+    // Registrar nuevo usuario (solo admin)
+    registerUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = regEmailInput.value;
+      const password = regPasswordInput.value;
+
+      if (currentUserRole !== 'admin') {
+        showAdminModalMessage(regErrorMessage, "Acceso denegado. Solo los administradores pueden registrar nuevos usuarios.", true);
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Guardar el rol en Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          email: user.email,
+          role: 'user', // Por defecto, los nuevos usuarios son 'user'
+          uid: user.uid
+        });
+
+        // Enviar correo de verificación
+        await sendEmailVerification(user);
+
+        showAdminModalMessage(regSuccessMessage, `Usuario ${email} registrado y correo de verificación enviado.`, false);
+        regEmailInput.value = '';
+        regPasswordInput.value = '';
+      } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        showAdminModalMessage(regErrorMessage, `Error al registrar usuario: ${error.message}`, true);
+      }
+    });
+
+    // Promover usuario a administrador (solo admin)
+    promoteAdminForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailToPromote = promoteEmailInput.value;
+
+      if (currentUserRole !== 'admin') {
+        showAdminModalMessage(promoteErrorMessage, "Acceso denegado. Solo los administradores pueden promover a otros administradores.", true);
+        return;
+      }
+
+      try {
+        // Buscar el UID del usuario por su correo electrónico en la colección 'users'
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', emailToPromote));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          showAdminModalMessage(promoteErrorMessage, `Usuario con correo ${emailToPromote} no encontrado en la base de datos.`, true);
+          return;
+        }
+
+        const userDoc = querySnapshot.docs[0];
+        const userUid = userDoc.id;
+
+        await updateDoc(doc(db, 'users', userUid), { role: 'admin' });
+        showAdminModalMessage(promoteSuccessMessage, `Usuario ${emailToPromote} promovido a administrador.`, false);
+        promoteEmailInput.value = '';
+      } catch (error) {
+        console.error("Error al promover a administrador:", error);
+        showAdminModalMessage(promoteErrorMessage, `Error al promover a administrador: ${error.message}`, true);
+      }
+    });
+
+    // --- Lógica del Menú de Hamburguesa ---
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      mobileMenuOverlay.classList.toggle('show');
+    });
+
+    mobileMenuOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      mobileMenuOverlay.classList.remove('show');
+    });
+
+    // --- Cloudinary Upload Function ---
+    // Tu Cloud Name es 'dae8gaaek' y tu Upload Preset es 'AdminLine'
+    const CLOUDINARY_CLOUD_NAME = 'dae8gaaek';
+    const CLOUDINARY_UPLOAD_PRESET = 'AdminLine';
+    const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+
+    async function uploadImageToCloudinary(file) {
+      if (!file) return null;
+
+      // No hay spinner aquí porque este dashboard no subirá imágenes desde el formulario simulado
+      // imageUploadSpinner.style.display = 'block'; // Mostrar spinner (removido)
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+      try {
+        const response = await fetch(CLOUDINARY_URL, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Error al subir imagen a Cloudinary: ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+        return data.secure_url; // Retorna la URL segura de la imagen subida
+      } catch (error) {
+        console.error("Error en la subida a Cloudinary:", error);
+        // showUserSubmissionMessage(userSubmissionError, `Error al subir imagen: ${error.message}`, true); // Removido
+        return null;
+      } finally {
+        // imageUploadSpinner.style.display = 'none'; // Ocultar spinner (removido)
+      }
+    }
+
+    // --- Lógica del modal de imagen expandida ---
+    closeImageModal.addEventListener('click', () => {
+      imageModal.classList.remove('show');
+      expandedImage.src = ''; // Limpiar la imagen al cerrar
+    });
+
+  </script>
+</body>
+</html>
