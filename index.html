@@ -139,7 +139,7 @@
     .form-group input:-webkit-autofill:hover,
     .form-group input:-webkit-autofill:focus,
     .form-group input:-webkit-autofill:active {
-        -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0.5) inset !important;
+        -webkit-box-shadow: 0 0 0px 1000px (0, 0, 0, 0.5) inset !important;
         -webkit-text-fill-color: white !important;
         transition: background-color 5000s ease-in-out 0s;
     }
@@ -202,6 +202,44 @@
       font-size: 14px;
       margin-top: 15px;
     }
+
+    /* Estilos para el mensaje de verificación enviado */
+    .success-verification-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 15px;
+      color: #27ae60; /* Green color */
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .verification-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    /* Estilos para ocultar/mostrar formularios de login/registro */
+    .login-form-section, .register-form-section {
+      display: none;
+    }
+
+    .login-form-section.active, .register-form-section.active {
+      display: block;
+    }
+
+    .toggle-form-link {
+      color: #007bff;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 15px;
+      display: block;
+      font-size: 14px;
+    }
+    .toggle-form-link:hover {
+      color: #00aaff;
+    }
+
 
     /* Estilos del Dashboard */
     .dashboard {
@@ -1134,22 +1172,51 @@
   <div id="loginScreen" class="login-screen">
     <div class="login-container">
       <img src="https://i.imgur.com/TiAds45.png" alt="Logo de Adminline" class="login-logo">
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="email">Username</label>
-          <input type="email" id="email" placeholder="" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="" required />
-        </div>
-        <div class="options-group">
-          <a href="#" id="resetPassword" class="forgot-password">Forgot Password?</a>
-        </div>
-        <button type="submit">LOGIN</button>
-        <p class="error" id="errorMessage" style="display: none;"></p>
-        <p class="success" id="successMessage" style="display: none;"></p>
-      </form>
+
+      <!-- Sección de Login -->
+      <div id="loginSection" class="login-form-section active">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Username</label>
+            <input type="email" id="email" placeholder="" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="" required />
+          </div>
+          <div class="options-group">
+            <a href="#" id="resetPassword" class="forgot-password">Forgot Password?</a>
+          </div>
+          <button type="submit">LOGIN</button>
+          <p class="error" id="errorMessage" style="display: none;"></p>
+          <p class="success" id="successMessage" style="display: none;"></p>
+        </form>
+        <!-- Se eliminó el enlace para mostrar el registro -->
+      </div>
+
+      <!-- La sección de registro público se eliminó completamente -->
+      <!-- <div id="registerSection" class="register-form-section">
+        <form id="publicRegisterForm">
+          <div class="form-group">
+            <label for="registerEmail">Correo electrónico</label>
+            <input type="email" id="registerEmail" placeholder="" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Contraseña</label>
+            <input type="password" id="registerPassword" placeholder="" required />
+          </div>
+          <button type="submit">REGISTRAR</button>
+          <p class="error" id="registerErrorMessage" style="display: none;"></p>
+        </form>
+        <span class="toggle-form-link" id="showLoginLink">¿Ya tienes cuenta? Inicia sesión.</span>
+      </div> -->
+
+      <!-- Mensaje de verificación de correo (para nuevos registros) -->
+      <div id="verificationSentMessage" class="success-verification-message" style="display: none;">
+        <i class="fas fa-check-circle verification-icon"></i>
+        <span id="verificationText">Correo de verificación enviado, por favor revisa tu bandeja de entrada y spam.</span>
+      </div>
+
     </div>
   </div>
 
@@ -1261,6 +1328,7 @@
             <input type="password" id="regPassword" required>
           </div>
           <button type="submit">Registrar Usuario</button>
+          <!-- Mensajes de éxito/error para el registro de usuario -->
           <p class="admin-modal-message success" id="regSuccess" style="display: none;"></p>
           <p class="admin-modal-message error" id="regError" style="display: none;"></p>
         </form>
@@ -1408,6 +1476,20 @@
     const expandedImage = document.getElementById('expandedImage');
     const closeImageModal = document.getElementById('closeImageModal');
 
+    // Nuevas referencias para el mensaje de verificación
+    const verificationSentMessage = document.getElementById('verificationSentMessage');
+    const verificationText = document.getElementById('verificationText');
+
+    // Las referencias a los elementos del formulario de registro público ya no son necesarias
+    // const loginSection = document.getElementById('loginSection');
+    // const registerSection = document.getElementById('registerSection');
+    // const showRegisterLink = document.getElementById('showRegisterLink');
+    // const showLoginLink = document.getElementById('showLoginLink');
+    // const publicRegisterForm = document.getElementById('publicRegisterForm');
+    // const registerEmailInput = document.getElementById('registerEmail');
+    // const registerPasswordInput = document.getElementById('registerPassword');
+    // const registerErrorMessage = document.getElementById('registerErrorMessage');
+
 
     let currentFormId = null;
     let currentFilter = 'inbox';
@@ -1426,14 +1508,13 @@
      * @param {boolean} [isError=true] - Si es true, el mensaje es un error; de lo contrario, es un éxito.
      */
     function showMessage(element, text, isError = true) {
+      // Ocultar todos los mensajes antes de mostrar el actual
+      errorMessage.style.display = "none";
+      successMessage.style.display = "none";
+      verificationSentMessage.style.display = 'none';
+      // registerErrorMessage.style.display = 'none'; // Ya no es necesario
       element.textContent = text;
       element.style.display = "block";
-      // Asegura que solo se muestre un tipo de mensaje a la vez
-      if (isError) {
-        successMessage.style.display = "none";
-      } else {
-        errorMessage.style.display = "none";
-      }
     }
 
     /**
@@ -1762,6 +1843,8 @@
         } else {
           showMessage(errorMessage, "Error: " + error.message);
         }
+        // Asegurarse de que el mensaje de verificación esté oculto en caso de error de login
+        verificationSentMessage.style.display = 'none';
       }
     });
 
@@ -1770,6 +1853,12 @@
       e.preventDefault(); // Previene el comportamiento por defecto del enlace
       const email = document.getElementById("email").value;
 
+      // Ocultar todos los mensajes previos
+      errorMessage.style.display = "none";
+      successMessage.style.display = "none";
+      verificationSentMessage.style.display = 'none';
+      // registerErrorMessage.style.display = 'none'; // Ya no es necesario
+
       if (!email) {
         showMessage(errorMessage, "Ingresa tu correo para restablecer la contraseña.");
         return; // Detiene la ejecución si no se ingresó un correo
@@ -1777,7 +1866,14 @@
 
       try {
         await sendPasswordResetEmail(auth, email);
-        showMessage(successMessage, `Se envió un enlace de recuperación a ${email}`, false);
+        // Mostrar un mensaje de éxito estándar para el restablecimiento de contraseña
+        showMessage(successMessage, `Se envió un enlace de recuperación a ${email}. Por favor, revisa tu bandeja de entrada.`, false);
+
+        // Ocultar el mensaje después de 5 segundos
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 5000);
+
       } catch (error) {
         showMessage(errorMessage, "Error al enviar el correo de recuperación: " + error.message);
       }
@@ -1864,10 +1960,7 @@
 
     // Manejar el clic del botón "Archivar"
     archiveFormBtn.addEventListener("click", async () => {
-      if (currentUserRole !== 'admin') {
-        showMessage(errorMessage, "Acceso denegado. Solo los administradores pueden archivar formularios.", true);
-        return;
-      }
+      // Se eliminó la verificación de rol de administrador
       if (currentFormId) {
         try {
           const formDocRef = doc(db, 'mensajes', currentFormId);
@@ -1882,10 +1975,7 @@
 
     // Manejar el clic del botón "Eliminar"
     deleteFormBtn.addEventListener("click", async () => {
-      if (currentUserRole !== 'admin') {
-        showMessage(errorMessage, "Acceso denegado. Solo los administradores pueden eliminar formularios.", true);
-        return;
-      }
+      // Se eliminó la verificación de rol de administrador
       if (currentFormId) {
         const confirmed = await showConfirmationModal("¿Estás seguro de que quieres eliminar este formulario permanentemente?");
         if (confirmed) {
@@ -1961,12 +2051,24 @@
         // Enviar correo de verificación
         await sendEmailVerification(user);
 
-        showAdminModalMessage(regSuccessMessage, `Usuario ${email} registrado y correo de verificación enviado.`, false);
+        // Mostrar el mensaje de verificación con la palomita para NUEVOS REGISTROS
+        // Asegurarse de que los otros mensajes del modal de admin estén ocultos
+        showAdminModalMessage(regSuccessMessage, ""); // Limpiar el mensaje de éxito del modal
+        regErrorMessage.style.display = 'none'; // Ocultar mensaje de error del modal
+
+        // Este mensaje ahora se muestra en el formulario de registro público, no aquí.
+        // verificationSentMessage.style.display = 'flex';
+        // verificationText.textContent = "Correo de verificación enviado, por favor revisa tu bandeja de entrada y spam.";
+        // setTimeout(() => { verificationSentMessage.style.display = 'none'; }, 5000);
+
         regEmailInput.value = '';
         regPasswordInput.value = '';
+        adminModal.classList.remove('show'); // Cerrar el modal de admin después de registrar
+
       } catch (error) {
         console.error("Error al registrar usuario:", error);
         showAdminModalMessage(regErrorMessage, `Error al registrar usuario: ${error.message}`, true);
+        // verificationSentMessage.style.display = 'none'; // Asegurarse de que el mensaje de verificación esté oculto en caso de error
       }
     });
 
@@ -2058,6 +2160,89 @@
       imageModal.classList.remove('show');
       expandedImage.src = ''; // Limpiar la imagen al cerrar
     });
+
+    // --- Lógica para alternar entre formularios de Login y Registro (ELIMINADA) ---
+    // showRegisterLink.addEventListener('click', (e) => {
+    //   e.preventDefault();
+    //   loginSection.classList.remove('active');
+    //   registerSection.classList.add('active');
+    //   // Limpiar mensajes y campos al cambiar de formulario
+    //   errorMessage.style.display = 'none';
+    //   successMessage.style.display = 'none';
+    //   verificationSentMessage.style.display = 'none';
+    //   registerErrorMessage.style.display = 'none';
+    //   document.getElementById('email').value = '';
+    //   document.getElementById('password').value = '';
+    //   registerEmailInput.value = '';
+    //   registerPasswordInput.value = '';
+    // });
+
+    // showLoginLink.addEventListener('click', (e) => {
+    //   e.preventDefault();
+    //   registerSection.classList.remove('active');
+    //   loginSection.classList.add('active');
+    //   // Limpiar mensajes y campos al cambiar de formulario
+    //   errorMessage.style.display = 'none';
+    //   successMessage.style.display = 'none';
+    //   verificationSentMessage.style.display = 'none';
+    //   registerErrorMessage.style.display = 'none';
+    //   document.getElementById('email').value = '';
+    //   document.getElementById('password').value = '';
+    //   registerEmailInput.value = '';
+    //   registerPasswordInput.value = '';
+    // });
+
+    // --- Manejar el envío del formulario de registro público (ELIMINADO) ---
+    // publicRegisterForm.addEventListener('submit', async (e) => {
+    //   e.preventDefault();
+    //   const email = registerEmailInput.value;
+    //   const password = registerPasswordInput.value;
+
+    //   // Ocultar todos los mensajes previos
+    //   errorMessage.style.display = "none";
+    //   successMessage.style.display = "none";
+    //   verificationSentMessage.style.display = 'none';
+    //   registerErrorMessage.style.display = 'none';
+
+    //   try {
+    //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    //     const user = userCredential.user;
+
+    //     // Guardar el rol por defecto en Firestore
+    //     await setDoc(doc(db, 'users', user.uid), {
+    //       email: user.email,
+    //       role: 'user',
+    //       uid: user.uid
+    //     });
+
+    //     // Enviar correo de verificación
+    //     await sendEmailVerification(user);
+
+    //     // Mostrar el mensaje de verificación con la palomita
+    //     verificationSentMessage.style.display = 'flex';
+    //     verificationText.textContent = "Correo de verificación enviado, por favor revisa tu bandeja de entrada y spam.";
+
+    //     // Limpiar campos del formulario de registro
+    //     registerEmailInput.value = '';
+    //     registerPasswordInput.value = '';
+
+    //     // Cambiar de vuelta al formulario de login después del registro exitoso
+    //     registerSection.classList.remove('active');
+    //     loginSection.classList.add('active');
+
+    //     // Ocultar el mensaje de verificación después de 5 segundos
+    //     setTimeout(() => {
+    //       verificationSentMessage.style.display = 'none';
+    //     }, 5000);
+
+    //   } catch (error) {
+    //     console.error("Error al registrar usuario:", error);
+    //     // Mostrar error en el formulario de registro público
+    //     registerErrorMessage.textContent = `Error al registrar: ${error.message}`;
+    //     registerErrorMessage.style.display = 'block';
+    //     verificationSentMessage.style.display = 'none'; // Asegurarse de que este mensaje esté oculto en caso de error
+    //   }
+    // });
 
   </script>
 </body>
