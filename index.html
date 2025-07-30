@@ -1822,10 +1822,10 @@
 
         // 9. Mostrar/ocultar botón de administración y cargar formularios
         if (currentUserRole === 'admin') {
-            adminActionsBtn.style.display = 'flex';
+            adminActionsBtn.style.display = 'flex !important'; // Añadido !important
             await seedStaticForms(); // Solo sembrar si es admin
         } else {
-            adminActionsBtn.style.display = 'none';
+            adminActionsBtn.style.display = 'none !important'; // Añadido !important
         }
         loadForms(currentFilter); // Cargar formularios después de que el dashboard esté listo
 
@@ -1922,10 +1922,10 @@
             vistaContenido.style.display = 'none';
 
             if (currentUserRole === 'admin') {
-              adminActionsBtn.style.display = 'flex';
+              adminActionsBtn.style.display = 'flex !important'; // Añadido !important
               await seedStaticForms();
             } else {
-              adminActionsBtn.style.display = 'none';
+              adminActionsBtn.style.display = 'none !important'; // Añadido !important
             }
             loadForms(currentFilter);
           }
