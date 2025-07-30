@@ -47,11 +47,7 @@
 
     body {
       font-family: 'Roboto', sans-serif;
-      /* Fondo de imagen para todo el body del dashboard (desktop) */
-      background-image: url('https://i.imgur.com/et4OEKL.jpeg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      /* Eliminado el fondo de imagen para el body del dashboard (desktop) */
       background-color: var(--bg-body); /* Color de respaldo */
       color: var(--text);
       display: flex; /* Convierte el body en un contenedor flex */
@@ -313,9 +309,8 @@
       padding-top: 0;
       position: sticky;
       top: 60px;
-      flex: 1; /* Permite que la barra lateral ocupe la altura disponible */
+      flex-shrink: 0; /* Asegura que no se encoja por debajo de su ancho */
       overflow-y: auto;
-      flex-shrink: 0;
       transition: width 0.5s ease-in-out, opacity 0.5s ease-in-out;
     }
 
@@ -392,11 +387,12 @@
     .mail-content {
       flex: 1;
       min-width: 0;
+      text-align: left; /* Asegura que el contenido del correo esté alineado a la izquierda */
     }
 
     .mail-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-between; /* Mantiene la fecha/hora a la derecha */
       align-items: center;
     }
 
@@ -405,6 +401,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex-grow: 1; /* Permite que el remitente ocupe el espacio antes de la hora */
     }
 
     .mail-time {
@@ -1222,6 +1219,8 @@
           <h3 class="preview-title" id="vistaTitulo"></h3>
           <p class="preview-from"><strong>De:</strong> <span id="vistaDe"></span></p>
           <p class="preview-date"><strong>Fecha:</strong> <span id="vistaFecha"></span></p>
+          <p class="preview-company"><strong>Empresa:</strong> <span id="vistaEmpresa"></span></p>
+          <p class="preview-phone"><strong>Teléfono:</strong> <span id="vistaTelefono"></span></p>
           <hr>
           <div class="preview-message" id="vistaMensaje"></div>
           <div id="vistaMedia"></div>
@@ -1360,6 +1359,8 @@
     const vistaTitulo = document.getElementById("vistaTitulo");
     const vistaDe = document.getElementById("vistaDe");
     const vistaFecha = document.getElementById("vistaFecha");
+    const vistaEmpresa = document.getElementById("vistaEmpresa"); // Nuevo elemento
+    const vistaTelefono = document.getElementById("vistaTelefono"); // Nuevo elemento
     const vistaMensaje = document.getElementById("vistaMensaje");
     const vistaMedia = document.getElementById("vistaMedia");
     const welcomeLoadingScreen = document.getElementById("welcomeLoadingScreen");
@@ -1376,7 +1377,7 @@
 
     const confirmationModal = document.getElementById("confirmationModal");
     const modalMessage = document.getElementById("modalMessage");
-    const confirmYesBtn = document.getElementById("confirmYes"); // CORRECCIÓN: Eliminado 'document ='
+    const confirmYesBtn = document.getElementById("confirmYes");
     const confirmNoBtn = document.getElementById("confirmNo");
 
     const inboxFilter = document.getElementById("inboxFilter");
@@ -1510,6 +1511,8 @@
         const id = formData.id;
         const nombre = formData.nombre || 'Anónimo';
         const email = formData.email || 'sin email';
+        const empresa = formData.empresa || 'N/A'; // Nuevo campo
+        const telefono = formData.telefono || 'N/A'; // Nuevo campo
         const mensaje = formData.mensaje || '';
         const fecha = formData.fecha?.toDate ? formData.fecha.toDate().toLocaleString() : new Date(formData.fecha).toLocaleString() || 'Fecha desconocida'; // Manejar objetos Date y Timestamps
         const mediaUrl = formData.mediaUrl || null;
@@ -1533,7 +1536,7 @@
               <span class="mail-from">${nombre}</span>
               <span class="mail-time">${fecha.split(',')[1] || fecha}</span>
             </div>
-            <div class="mail-subject">Nuevo formulario</div>
+            <div class="mail-subject">Formulario de ${empresa}</div>
             <div class="mail-preview">${mensaje.substring(0, 100)}${mensaje.length > 100 ? '...' : ''}</div>
           </div>
         `;
@@ -1541,9 +1544,11 @@
         mailItem.addEventListener("click", () => {
           // Populate preview with form data
           currentFormId = id; // Almacenar el ID del formulario actual
-          vistaTitulo.textContent = "Formulario de contacto";
+          vistaTitulo.textContent = "Detalles del Formulario";
           vistaDe.textContent = `De: ${nombre} (${email})`;
           vistaFecha.textContent = `Fecha: ${fecha}`;
+          vistaEmpresa.textContent = `Empresa: ${empresa}`; // Mostrar empresa
+          vistaTelefono.textContent = `Teléfono: ${telefono}`; // Mostrar teléfono
           vistaMensaje.textContent = mensaje;
           vistaMedia.innerHTML = "";
 
@@ -1581,6 +1586,8 @@
           id: "form-prueba-1",
           nombre: "Juan Pérez",
           email: "juan.perez@example.com",
+          empresa: "Tech Solutions Inc.", // Nuevo campo
+          telefono: "555-1234", // Nuevo campo
           mensaje: "Estimados, me gustaría obtener más detalles sobre sus servicios...",
           fecha: new Date(2025, 6, 30, 10, 30), // 30 de julio de 2025, 10:30 AM
           mediaUrl: null,
@@ -1590,6 +1597,8 @@
           id: "form-prueba-2",
           nombre: "María Antonieta",
           email: "maria.antonieta@example.com",
+          empresa: "Global Innovations", // Nuevo campo
+          telefono: "555-5678", // Nuevo campo
           mensaje: "Tengo un problema con la configuración de mi cuenta, ¿podrían ayudarme?",
           fecha: new Date(2025, 6, 29, 15, 0), // 29 de julio de 2025, 3:00 PM
           mediaUrl: 'https://res.cloudinary.com/dae8gaaek/image/upload/v1700000000/sample.jpg', // Ejemplo de imagen
@@ -1599,6 +1608,8 @@
           id: "form-prueba-3",
           nombre: "Pedro Gómez",
           email: "pedro.gomez@example.com",
+          empresa: "Creative Designs LLC", // Nuevo campo
+          telefono: "555-9012", // Nuevo campo
           mensaje: "Consulta sobre el estado de mi pedido.",
           fecha: new Date(2025, 6, 28, 11, 0),
           mediaUrl: 'https://res.cloudinary.com/dae8gaaek/video/upload/v1700000000/dog.mp4', // Ejemplo de video
@@ -1676,62 +1687,71 @@
         const user = userCredential.user;
 
         // Verificar si el correo electrónico del usuario está verificado
-        // Esta verificación se moverá principalmente a onAuthStateChanged para una lógica centralizada
-        // Pero se mantiene aquí para una retroalimentación inmediata si el login falla por no verificado.
         if (!user.emailVerified) {
           await signOut(auth); // Si no está verificado, cierra la sesión
           showMessage(errorMessage, "Por favor, verifica tu correo electrónico antes de continuar.", true);
           return; // Detiene la ejecución si el correo no está verificado
         }
 
-        // --- Secuencia de Animación de Login REVISADA Y AJUSTADA ---
+        // --- Secuencia de Animación de Login REVISADA ---
 
         // 1. Iniciar el deslizamiento del contenedor de login
         loginContainer.classList.add('slide-out');
 
         // 2. Mostrar la pantalla de bienvenida/carga *inmediatamente* para que cubra la transición
-        welcomeLoadingScreen.style.display = "flex"; // Asegura que sea display: flex antes de la transición
-        // Pequeña pausa para asegurar que el navegador aplique display:flex antes de la transición de opacidad
-        await new Promise(resolve => setTimeout(resolve, 50));
-        welcomeLoadingScreen.classList.add('show'); // Activar su fade-in (0.5s)
+        welcomeLoadingScreen.style.display = "flex";
+        await new Promise(resolve => setTimeout(resolve, 50)); // Pequeña pausa para asegurar que display:flex se aplique
+        welcomeLoadingScreen.classList.add('show');
 
         // Esperar a que la animación de slide-out del loginContainer termine (0.8s)
-        // Y a que la pantalla de carga esté completamente opaca (0.5s)
-        // Tomamos el mayor de los tiempos para asegurar que todo se vea bien.
-        await new Promise(resolve => setTimeout(resolve, 800)); // Esperar a que el slide-out termine
+        await new Promise(resolve => setTimeout(resolve, 800));
+        loginScreen.style.display = "none"; // Ocultar la pantalla de login completamente
 
-        // 3. Ocultar la pantalla de login completamente
-        loginScreen.style.display = "none";
-
-        // 4. Iniciar el efecto de escritura del mensaje de bienvenida
+        // 3. Iniciar el efecto de escritura del mensaje de bienvenida
         await typeWriter(welcomeMessageText, "¡Bienvenido!");
-        readingIcon.style.opacity = 1; // Hacer el icono visible después de escribir
-        await new Promise(resolve => setTimeout(resolve, 500)); // Pausa después del mensaje y aparición del icono
+        readingIcon.style.opacity = 1;
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // 5. Mostrar los spinners (esferas)
-        sphereSpinnerContainer.classList.add('show'); // Activar la visibilidad de las esferas
-        await new Promise(resolve => setTimeout(resolve, 8000)); // Dejar la pantalla de carga visible por 8 segundos
+        // 4. Mostrar los spinners (esferas)
+        sphereSpinnerContainer.classList.add('show');
+
+        // 5. Esperar los 8 segundos completos para la pantalla de carga
+        await new Promise(resolve => setTimeout(resolve, 8000)); // ESTA ES LA ESPERA DE 8 SEGUNDOS
 
         // 6. Ocultar la pantalla de bienvenida/carga
-        welcomeLoadingScreen.classList.remove('show'); // Esto activará la transición de fade-out (0.5s)
-        // Esperar a que la pantalla de carga se desvanezca
-        await new Promise(resolve => setTimeout(resolve, 500));
+        welcomeLoadingScreen.classList.remove('show');
+        await new Promise(resolve => setTimeout(resolve, 500)); // Esperar a que el fade-out termine
         welcomeLoadingScreen.style.display = "none"; // Ocultar completamente después del fade-out
 
-        // 7. Preparar el dashboard para la animación de entrada
-        dashboard.style.opacity = 0; // Establecer opacidad inicial a 0
-        dashboard.style.display = "flex"; // Hacerlo visible en el flujo, pero transparente
+        // 7. Obtener el rol del usuario *antes* de mostrar el dashboard
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          currentUserRole = userDocSnap.data().role || 'user';
+        } else {
+          await setDoc(userDocRef, { email: user.email, role: 'user', uid: user.uid });
+          currentUserRole = 'user';
+        }
+        console.log("Current user role detected (after login):", currentUserRole); // Debugging
 
-        // 8. Aplicar la animación de entrada al dashboard
-        dashboard.classList.add('fade-in');
+        // 8. Preparar y mostrar el dashboard
+        dashboard.style.opacity = 0;
+        dashboard.style.display = "flex"; // Make it visible but transparent
+        dashboard.classList.add('fade-in'); // Apply fade-in animation
 
-        // Restaurar el contenido original del login-container (útil si el usuario cierra sesión más tarde)
-        // Se asume que originalLoginContent está definido en algún lugar o se puede obtener del DOM.
-        // Por ahora, lo dejaré comentado si no es una variable global.
-        // loginContainer.innerHTML = originalLoginContent;
+        // 9. Mostrar/ocultar botón de administración y cargar formularios
+        if (currentUserRole === 'admin') {
+            adminActionsBtn.style.display = 'flex';
+            await seedStaticForms(); // Solo sembrar si es admin
+        } else {
+            adminActionsBtn.style.display = 'none';
+        }
+        loadForms(currentFilter); // Cargar formularios después de que el dashboard esté listo
+
+        // 10. Restablecer el estado del contenedor de login (útil si el usuario cierra sesión más tarde)
         loginContainer.classList.remove('slide-out');
-        loginContainer.style.transform = 'translateY(0)'; // Reset transform to ensure it's in original position if shown again
-        loginContainer.style.opacity = 1; // Reset opacity
+        loginContainer.style.transform = 'translateY(0)';
+        loginContainer.style.opacity = 1;
 
       } catch (error) {
         // Manejo de errores específicos de Firebase Auth
@@ -1775,6 +1795,7 @@
     });
 
     // Observador del estado de autenticación de Firebase
+    // Este observador ahora se usa principalmente para el estado inicial de la página (no después de un login exitoso desde el formulario)
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         // Obtener el rol del usuario
@@ -1784,37 +1805,36 @@
         if (userDocSnap.exists()) {
           currentUserRole = userDocSnap.data().role || 'user';
         } else {
-          // Si el documento de usuario no existe, crearlo con rol 'user'
-          // Esto es importante para que todos los usuarios tengan un rol definido en Firestore
           await setDoc(userDocRef, { email: user.email, role: 'user', uid: user.uid });
           currentUserRole = 'user';
         }
-        // --- DEBUGGING: Log current user role ---
-        console.log("Current user role detected:", currentUserRole);
-        // --- END DEBUGGING ---
+        console.log("Current user role detected (onAuthStateChanged):", currentUserRole); // Debugging
 
         if (user.emailVerified) {
-          loginScreen.style.display = "none";
-          welcomeLoadingScreen.style.display = "none";
-          dashboard.style.display = "flex";
-          dashboard.classList.remove('fade-in');
-          dashboard.style.opacity = 1;
+          // Si el usuario ya está autenticado y verificado al cargar la página (lo cual no debería pasar por el signOut inicial)
+          // o si esta es la finalización de un flujo de autenticación que no pasó por el formulario de login.
+          // Aseguramos que el dashboard se muestre directamente.
+          // Solo mostrar si el dashboard NO está ya visible y la pantalla de carga NO está activa.
+          if (dashboard.style.display !== "flex" && !welcomeLoadingScreen.classList.contains('show') && welcomeLoadingScreen.style.display !== "flex") {
+            loginScreen.style.display = "none";
+            welcomeLoadingScreen.style.display = "none";
+            dashboard.style.display = "flex";
+            dashboard.classList.remove('fade-in'); // No hay fade-in si se muestra directamente
+            dashboard.style.opacity = 1;
 
-          panelVista.classList.remove('show-content');
-          vistaContenido.style.display = 'none';
+            panelVista.classList.remove('show-content');
+            vistaContenido.style.display = 'none';
 
-          // Mostrar/ocultar botón de administración
-          if (currentUserRole === 'admin') {
-            adminActionsBtn.style.display = 'flex';
-            // Solo ejecutar seedStaticForms si el usuario es admin
-            await seedStaticForms();
-          } else {
-            adminActionsBtn.style.display = 'none';
+            if (currentUserRole === 'admin') {
+              adminActionsBtn.style.display = 'flex';
+              await seedStaticForms();
+            } else {
+              adminActionsBtn.style.display = 'none';
+            }
+            loadForms(currentFilter);
           }
 
-          loadForms(currentFilter); // Cargar los formularios iniciales
         } else {
-          // Si el correo no está verificado, cerrar sesión y mostrar mensaje
           await signOut(auth);
           loginScreen.style.display = "flex";
           welcomeLoadingScreen.style.display = "none";
@@ -1823,12 +1843,11 @@
         }
       } else {
         // Si no hay usuario autenticado, mostrar la pantalla de login.
-        // El signOut() explícito al inicio del script ya maneja el cierre de sesión en recargas.
         loginScreen.style.display = "flex";
         welcomeLoadingScreen.style.display = "none";
         dashboard.style.display = "none";
-        adminActionsBtn.style.display = 'none'; // Asegurarse de que el botón admin esté oculto si no hay usuario
-        currentUserRole = 'user'; // Resetear rol
+        adminActionsBtn.style.display = 'none';
+        currentUserRole = 'user';
       }
     });
 
